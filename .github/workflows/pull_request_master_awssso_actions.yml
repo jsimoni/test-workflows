@@ -8,7 +8,6 @@ name: Pull Request to Master for AWS SSO
 
 on:
   pull_request:
-    types: [ closed, labeled, opened ]
     paths:
      - 'applied/accounts/global/us-east-1/awssso/**'
      - 'infrastructure/region/awssso/**'
