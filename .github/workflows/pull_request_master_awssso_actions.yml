@@ -24,7 +24,7 @@ env:
   TERRAFORM_LOCK_HCL_PATH: './applied/accounts/global/us-east-1/awssso/.terraform.lock.hcl' #path to the .terraform.lock.hcl file is required for GitHub Actions to add and commit
   open_pull_request: github.base_ref == 'master' && join(github.event.pull_request.labels.*.name, '') == '' && github.event.action == 'opened'
   merge_pull_request1: github.base_ref == 'master' && join(github.event.pull_request.labels.*.name, '') == '' && github.event.pull_request.merged == true  
-  merge_pull_request: ${{ github.base_ref == 'master' }} && join( ${{ github.event.pull_request.labels.*.name }}, '') == '' && ${{ github.event.pull_request.merged }} == true  
+  merge_pull_request: ${{ github.base_ref == 'master' && join(github.event.pull_request.labels.*.name, '') == '' && github.event.pull_request.merged == true }} 
   
 permissions:
   id-token: write       # write permissions are needed to generate the OIDC token for AWS
