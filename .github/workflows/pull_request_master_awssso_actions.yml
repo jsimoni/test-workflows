@@ -34,7 +34,7 @@ concurrency: production  # This will ensure that only a single PR workflow will 
 
 jobs:
   set_action:
-    name: "Set Action Variable"
+    name: "Set Action Variable"   
     runs-on: ubuntu-20.04    
     env:
       open_pull_request: github.base_ref == 'master' && join(github.event.pull_request.labels.*.name, '') == '' && github.event.action == 'opened'
@@ -46,6 +46,7 @@ jobs:
 
   docs_awssso:
     name: "Generate Terraform Docs for AWS SSO"
+    needs: [set_action]
     if: github.base_ref == 'master' && join(github.event.pull_request.labels.*.name, '') == '' && github.event.action == 'opened'
     uses: ./.github/workflows/terraform_docs.yml
     with:
