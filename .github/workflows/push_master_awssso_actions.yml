@@ -6,7 +6,7 @@ name: Merge to Master for AWS SSO
 on:
   push:
     branches:
-      - master
+      - master-stop
     paths:
       - 'applied/accounts/global/us-east-1/awssso/**'
       - 'infrastructure/region/awssso/**'
