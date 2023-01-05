@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: echo
         run: |
-          echo "$open_pull_request: $open_pull_request"
+          echo "open_pull_request: $open_pull_request"
           echo "merge_pull_request: $merge_pull_request"
 
   docs_awssso:
