@@ -1,0 +1,30 @@
+name: Push To Any Branch Actions
+
+on:
+  push:
+    branches-ignore:
+      - master     # no need to run when merging/pushing to master as the results would already be in the pull request being merged
+    paths-ignore:
+      - '.github/**'
+      - '**.md'    # do not run the job when only changing markdown files
+      
+jobs:
+  kics_infrastructure:
+    # Kics performs static code analysis of Infrastructure of Code (Terraform).
+    # More details can be found here https://docs.kics.io/latest/
+    name: Terraform Actions to run Kics scan
+    uses: ./.github/workflows/terraform_kics.yml
+    with:
+      # Enabling Comments will add a comment to a PR, but these do no exist in Push events and will throw an error.
+      ENABLE_COMMENTS: false
+      WORKING_DIRECTORY: 'infrastructure/region/'
+
+  kics_modules:
+    # Kics performs static code analysis of Infrastructure of Code (Terraform).
+    # More details can be found here https://docs.kics.io/latest/
+    name: Terraform Actions to run Kics scan
+    uses: ./.github/workflows/terraform_kics.yml
+    with:
+      # Enabling Comments will add a comment to a PR, but these do no exist in Push events and will throw an error.
+      ENABLE_COMMENTS: false
+      WORKING_DIRECTORY: 'modules/'

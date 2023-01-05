@@ -1,0 +1,69 @@
+name: Merge to Master for AWS SSO
+#this action will run on the merge to master for any changes to the code that manages the AWS SSO resources.
+#it should perform the following actions:
+# -performs terraform apply and adds the plan to a comment in the pull request to inform the approver.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'applied/accounts/global/us-east-1/awssso/**'
+      - 'infrastructure/region/awssso/**'
+      - '!**.md'    # do not run the job when only changing markdown files
+      - '.github/**'  #this is only there for testing
+
+env:
+  TERRAFORM_VERSION: 1.1.5
+  TERRAGRUNT_VERSION: 0.36.2
+  ORCHESTRATION_ROLE_ARN: 'arn:aws:iam::119662755212:role/awssso_orchestration_role' #iam-global
+  WORKER_ROLE_ARN: 'arn:aws:iam::569715827492:role/awssso_worker_role' #ipipeline-root
+  TERRAFORM_WORKING_DIR: './applied/accounts/global/us-east-1/awssso/' #scoped to only AWS SSO Terraform code
+
+permissions:
+  id-token: write       # write permissions are needed to generate the OIDC token for AWS
+  contents: read        # read permissions are needed to retreive the code
+  issues: write         # write permissions are needed in order to create comments
+  pull-requests: write  # write permissions are needed in order to create comments
+
+concurrency: production    # This will ensure only a single workflow of merge to master is run at a time
+
+jobs:
+  apply:
+    name: "Run Terragrunt Apply"
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1.3.2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: true
+
+      - name: Setup Terragrunt
+        uses: autero1/action-terragrunt@v1.1.0
+        with:
+          terragrunt_version: ${{ env.TERRAGRUNT_VERSION }}
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ env.ORCHESTRATION_ROLE_ARN }}
+
+      - name: Terragrunt Init
+        id: init
+        run: terragrunt run-all init -lockfile=readonly -no-color --terragrunt-non-interactive
+
+      - name: Terragrunt Apply
+        id: apply
+        if: github.event_name == 'push'
+        #this is doing a plan by design for now.
+        #after merging to master and testing the plan works, we'll create another PR to change this to apply
+        run: terragrunt run-all apply -no-color --terragrunt-non-interactive
+        continue-on-error: true

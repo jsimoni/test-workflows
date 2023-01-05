@@ -1,0 +1,14 @@
+name: 'Generate Terraform docs'
+on:
+  workflow_call:
+    inputs:
+      WORKING_DIRECTORY:
+        required: true
+        type: string
+jobs:
+  docs:
+    name: 'Terraform Docs'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: 'Checkout'
+        run: echo "Hello World!"

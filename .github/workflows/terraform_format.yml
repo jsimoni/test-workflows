@@ -1,0 +1,59 @@
+name: 'Terraform Format and Validation Actions'
+on:
+  workflow_call:
+    inputs:
+      TERRAFORM_VERSION:
+        required: true
+        type: string
+  # pull_request:
+  #   branches:
+  #     - master
+  #   paths-ignore:
+  #     - '.github/**'
+jobs:
+  collectInputs:
+    name: Collect workflow inputs
+    runs-on: ubuntu-20.04
+    outputs:
+      directories: ${{ steps.dirs.outputs.directories }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get root directories with terraform files
+        id: dirs
+        uses: clowdhaus/terraform-composite-actions/directories@v1.3.0
+
+  terraform:
+    name: "Terraform"
+    needs: collectInputs
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        directory: ${{ fromJson(needs.collectInputs.outputs.directories) }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TF_IN_AUTOMATION: true
+    steps:
+      # This step will allow future steps to download resources from other private iPipeline repos.
+      # secrets.HASHICORP_TERRAFORM is stored at the Organization level and contains a PAT of our iPipeline Build account.
+      - uses: fusion-engineering/setup-git-credentials@v2
+        with:
+          credentials: https://oauth2:${{ secrets.HASHICORP_TERRAFORM }}@github.com
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # Making sure to checkout the branch the PR is coming from.
+          # This way any updates found in the formatting step can be commited to the branch being merged.
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1.3.2
+        with:
+          terraform_version: ${{ inputs.TERRAFORM_VERSION }}
+
+      # Rewrite Terraform configuration files to a canonical format and style.
+      - name: Terraform Format - ${{ matrix.directory }}
+        id: fmt
+        working-directory: ${{ matrix.directory }}
+        run: echo "Hello World!"
