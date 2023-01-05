@@ -35,6 +35,15 @@ permissions:
 concurrency: production  # This will ensure that only a single PR workflow will run at a time to avoid different workflow running terraform plan & apply trying to acquire state lock at the same time causing one to fail
 
 jobs:
+  echo:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Format plan
+        id: formatplan
+        run: |
+          echo "$open_pull_request"
+          echo "$merge_pull_request"
+
   docs_awssso:
     name: "Generate Terraform Docs for AWS SSO"
     needs: [set_action]
