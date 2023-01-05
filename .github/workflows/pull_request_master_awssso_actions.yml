@@ -37,11 +37,10 @@ jobs:
   echo:
     runs-on: ubuntu-20.04
     steps:
-      - name: Format plan
-        id: formatplan
+      - name: echo
         run: |
-          echo "$open_pull_request"
-          echo "$merge_pull_request"
+          echo "open_pull_request: $open_pull_request"
+          echo "merge_pull_request: $merge_pull_request"
 
   docs_awssso:
     name: "Generate Terraform Docs for AWS SSO"
