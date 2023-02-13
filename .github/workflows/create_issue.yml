@@ -1,0 +1,41 @@
+name: Explictly checkout main branch
+#this workflow runs every 6 months to recommend that a version upgrade of terraform, referenced actions, and runner operating system be done in order to stay current.
+#create issue, and assign it to all code owners in the repository to remind them to upgrade Terraform version in the repository
+
+on:
+  schedule:
+    - cron: '0 10 5 1,7 *' #this workflow is triggered every 6 months on the 5th of January and July at 10:00 AM (UTC)
+  workflow_dispatch:
+
+permissions:
+  issues: write        ## write permissions are needed in order to create issue
+  contents: read       # write permissions are needed in order to read the content of .github/CODEOWNERS file
+
+jobs:
+  upgrade_reminder:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        ref: main
+
+    - name: Read CODEOWNERS file
+      id: codeowners
+      #this step reads the content of the CODEOWNERS file in the repository
+      run: |
+        echo "code_owners= cat .github/CODEOWNERS" >> $GITHUB_OUTPUT
+        
+    - name: Create Issue
+      id: create_issue
+      uses: dacbd/create-issue-action@v1.2.1
+      #this step will create an issue in the repository with a title "Upgrade Terraform , referenced Github Actions, and runner operating system versions, and assign issue to code owners
+      with:
+        token: ${{ github.token }}
+        title: Upgrade Terraform
+        body: |
+          Please upgrade Terraform, referenced Github Actions, and runner operating system versions in the repository in order to stay current.  
+          Click on the link below to find the instructions on upgrading:
+          https://github.com/ipipeline/terraform-aws-github-oidc-provider/blob/master/.github/contributing.md
+        assignees: "${{ steps.codeowners.outputs.code_owners }}"
