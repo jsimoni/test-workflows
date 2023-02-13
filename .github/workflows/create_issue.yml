@@ -26,6 +26,7 @@ jobs:
       #this step reads the content of the CODEOWNERS file in the repository
       run: |
         echo "code_owners= cat .github/CODEOWNERS" >> $GITHUB_OUTPUT
+        echo "cat .github/CODEOWNERS"
         
     - name: Create Issue
       id: create_issue
@@ -38,4 +39,4 @@ jobs:
           Please upgrade Terraform, referenced Github Actions, and runner operating system versions in the repository in order to stay current.  
           Click on the link below to find the instructions on upgrading:
           https://github.com/ipipeline/terraform-aws-github-oidc-provider/blob/master/.github/contributing.md
-        assignees: "${{ steps.codeowners.outputs.code_owners }}"
+        #assignees: "${{ steps.codeowners.outputs.code_owners }}"
