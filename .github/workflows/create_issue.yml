@@ -24,9 +24,12 @@ jobs:
     - name: Read CODEOWNERS file
       id: codeowners
       #this step reads the content of the CODEOWNERS file in the repository
-      run: |
-        echo "code_owners= cat .github/CODEOWNERS" >> $GITHUB_OUTPUT
-        echo "cat .github/CODEOWNERS"
+      #run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+      run: echo "code_owners=$(cat .github/CODEOWNERS)" >> $GITHUB_OUTPUT
+      #  echo "cat .github/CODEOWNERS"
+      
+    - name: Test output
+      run: echo ${{ steps.codeowners.outputs.code_owners }}      
         
     - name: Create Issue
       id: create_issue
